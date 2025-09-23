@@ -1,0 +1,37 @@
+# (C) 2023 A.Voß, a.voss@fh-aachen.de, db@codebasedlearning.dev
+#
+# docker compose -f docker/compose.yml up mariadb -d
+# docker compose -f docker/compose.yml mariadb down
+#
+# Compose V2
+
+# version: "3"                  # maybe needed in older versions
+name: ami_database_training     # comment out in older versions
+
+services:
+
+  mariadb:
+    image: mariadb:latest
+    # userns_mode: keep-id  # needed for podman on macOS
+    container_name: ami_data_warehouse_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3312:3306"
+    volumes:
+      - ../mariadb_data:/var/lib/mysql
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    # userns_mode: keep-id  # needed for podman on macOS
+    container_name: ami_data_warehouse_postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5438:5432"
+    volumes:
+      - ../postgres_data:/var/lib/postgresql/data/
+    restart: always
