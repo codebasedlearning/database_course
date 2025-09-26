@@ -1,4 +1,4 @@
--- (C) 2023 A.Voß, a.voss@fh-aachen.de, db@codebasedlearning.dev
+-- (C) 2025 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
 
 -- SQL-Solutions Unit 0x04
 
