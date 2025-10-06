@@ -3,9 +3,9 @@
 -- SQL-Commands Unit 0x01
 
 -- select default schema in MariaDB (comment out for PostgreSQL):
-USE ami_zone;
+-- USE ami_zone;
 -- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
+SET SEARCH_PATH = ami_zone;
 
 -- all data
 SELECT * FROM ami_zone.shop_product;
@@ -78,7 +78,7 @@ SELECT name, price,
             when price <= 2.00 then 'cheap'
             when price <= 5.00 then 'ok'
             else 'expensive'
-        end as 'affordable'
+       end as affordable
     FROM shop_product
     WHERE price between 1.00 and 10.00;
 
@@ -96,10 +96,10 @@ SELECT name, price FROM shop_product
     WHERE category_id in (1,3,4) ORDER BY price, name desc;
 
 -- interactive usage (rand in MariaDB, random in PostgreSQL)
-select now(), 1+2*3, rand();
--- select now(), 1+2*3, random();
-select now(), 1+2*3, rand() FROM dual;
--- select now(), 1+2*3, random(); -- DUAL unknown;
+-- select now(), 1+2*3, rand();
+select now(), 1+2*3, random();
+-- select now(), 1+2*3, rand() FROM dual;
+select now(), 1+2*3, random(); -- DUAL unknown;
 
 -- all tables in ami_zone
 
