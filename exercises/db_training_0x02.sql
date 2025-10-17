@@ -3,9 +3,9 @@
 -- SQL-Commands Unit 0x02
 
 -- select default schema in MariaDB (comment out for PostgreSQL):
-USE ami_zone;
+-- USE ami_zone;
 -- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
+SET SEARCH_PATH = ami_zone;
 
 -- all data
 SELECT P.id,P.name,P.category_id
