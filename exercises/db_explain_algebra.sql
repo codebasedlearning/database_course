@@ -1,10 +1,13 @@
 -- (C) 2023 A.Voß, a.voss@fh-aachen.de, db@codebasedlearning.dev
 
-use ami_algebra;
+-- use ami_algebra;
 
 -- diese Relationen R und S sind auf das Wesentliche reduziert;
 -- die Entitäten bestehen aus künstlichen Attributen der
 -- Form [a1,b1,c1];
+
+-- postgres
+SET SEARCH_PATH = ami_algebra;
 
 -- Besonderheiten R: ein Null-Eintrag in C der Entität Rid=4
 SELECT * from R;
@@ -70,7 +73,7 @@ SELECT R.* FROM R NATURAL JOIN S;
 -- nicht im Join vorkommen, und davon nur die
 -- Attribute aus R
 SELECT R.* FROM R LEFT OUTER JOIN S ON R.C = S.C
-WHERE isnull(S.C);
+WHERE S.C is null;
 
 -- Left Outer Join, d.h. alle Entitäten aus R und
 -- ggf. mit Attributen aus S, wenn assoziierte Entität
@@ -104,7 +107,7 @@ WITH
      A1 as (select * from R where Rid<4),
      A2 as (select * from R where Rid>1)
 SELECT A1.* FROM A1 LEFT OUTER JOIN A2 USING (Rid)
-WHERE isnull(A2.Rid);
+WHERE A2.Rid is null;
 
 -- Durchschnitt/Intersect: gleiche Teilmengen A1 und A2
 -- wie zuvor, dann ergibt der inner join genau die Elemente,
@@ -142,18 +145,18 @@ SELECT count(*),count(C) FROM R;
 SELECT sum(length(B)) FROM R;
 
 -- group-Vorbereitung: der substr. ergibt die Nummer 1-4
-SELECT *,substr(A,2) as 'no' FROM R;
+SELECT *,substr(A,2) as no FROM R;
 
 -- group: es wird nach Rest div 2 gruppiert und die Summe über
 -- diese No gebildet (1+3 und 2+4)
 WITH
-     A1 as (SELECT substr(A,2) as 'no' FROM R)
+     A1 as (SELECT substr(A,2)::int as no FROM R)
 SELECT sum(no) FROM A1
 GROUP BY no%2=1;
 
 -- group+having: Gruppierung wie oben, aber mit Bedingung an
 -- das Ergebnis der Gruppierung unter einem Alias (S)
 WITH
-     A1 as (SELECT substr(A,2) as 'no' FROM R)
+     A1 as (SELECT substr(A,2)::int as no FROM R)
 SELECT sum(no) as S FROM A1
-GROUP BY no%2=1 HAVING S>4;
+GROUP BY no%2=1 HAVING sum(no)>4;
