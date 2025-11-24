@@ -3,9 +3,9 @@
 -- SQL-Solutions Unit 0x04
 
 -- select default schema in MariaDB (comment out for PostgreSQL):
-USE ami_zone;
+-- USE ami_zone;
 -- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
+SET SEARCH_PATH = ami_zone;
 
 -- A4.1:
 SELECT * FROM shop_product WHERE name like 'Chips';
@@ -19,9 +19,9 @@ SELECT P.name,P.price FROM shop_product P WHERE P.price = (
 SELECT count(*) FROM shop_product WHERE category_id=2;
 SELECT P.category_id,C.name,count(*)
     FROM shop_product P join shop_category C on P.category_id = C.id
-    GROUP BY P.category_id;
+    GROUP BY P.category_id,C.name;
 -- same number of products as in category 2
-SELECT P.category_id, C.name,count(*) as 'count'
+SELECT P.category_id, C.name,count(*) as count
     FROM shop_product P join shop_category C on P.category_id = C.id
 GROUP BY P.category_id, C.name
 HAVING count(*) = (
@@ -54,14 +54,14 @@ WHERE W.department_id = (
 SELECT * FROM hr_works_in_at;
 SELECT avg(hours_per_week) FROM hr_works_in_at group by employee_id;
 -- average of 20 hours across departments
-SELECT R.employee_id,E.name,E.salary,avg(R.hours_per_week) as 'avg'
+SELECT R.employee_id,E.name,E.salary,avg(R.hours_per_week) as avg
 FROM hr_works_in_at R JOIN hr_employee E on R.employee_id = E.id
-        GROUP BY R.employee_id HAVING avg(R.hours_per_week)=20;
+        GROUP BY R.employee_id,E.name,E.salary HAVING avg(R.hours_per_week)=20;
 
-# A4.6
+-- A4.6
 SELECT * FROM shop_order B;
 -- employees have already placed an order
-SELECT M.name,B.id 'for order' FROM shop_order B
+SELECT M.name,B.id for_order FROM shop_order B
     JOIN hr_employee M on B.employee_id = M.id;
 
 -- A4.7
@@ -75,8 +75,8 @@ select * from shop_product P
 where P.id not in (select product_id from shop_consists_of);
 
 -- A4.8
-SELECT B.id 'order',B.customer_id,C.brand,Q.sum FROM shop_order B JOIN (
-    SELECT R.order_id,sum(R.units*P.price) as 'sum'
+SELECT B.id as order,B.customer_id,C.brand,Q.sum FROM shop_order B JOIN (
+    SELECT R.order_id,sum(R.units*P.price) as sum
     FROM shop_consists_of R JOIN shop_product P on P.id = R.product_id
     GROUP BY R.order_id
 ) Q on B.id=Q.order_id JOIN shop_customer C on B.customer_id = C.id;

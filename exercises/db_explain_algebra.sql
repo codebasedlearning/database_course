@@ -109,6 +109,10 @@ WITH
 SELECT A1.* FROM A1 LEFT OUTER JOIN A2 USING (Rid)
 WHERE A2.Rid is null;
 
+SELECT * FROM R WHERE Rid<4
+EXCEPT
+SELECT * FROM R WHERE Rid>1;
+
 -- Durchschnitt/Intersect: gleiche Teilmengen A1 und A2
 -- wie zuvor, dann ergibt der inner join genau die Elemente,
 -- die in beiden Mengen sind -> Durchschnitt
@@ -116,6 +120,10 @@ WITH
      A1 as (select * from R where Rid<4),
      A2 as (select * from R where Rid>1)
 SELECT A1.* FROM A1 JOIN A2 USING (Rid);
+
+SELECT * FROM R WHERE Rid<4
+INTERSECT
+SELECT * FROM R WHERE Rid>1;
 
 -- Vereinigung/Union: der SQL-Befehl union vereinigt die beiden
 -- Teilmengen A1 (hier Rid 1) und A2 (hier Rid 1 und 4), aber
@@ -126,6 +134,10 @@ WITH
 SELECT * FROM A1
 UNION
 SELECT * FROM A2;
+
+SELECT * FROM R WHERE Rid=1
+UNION
+SELECT * FROM R WHERE Rid=4 or Rid=1;
 
 -- Vereinigung/Union: der SQL-Befehl union all vereinigt
 -- wie zuvor, aber doppelte Elemente bleiben (Rid 1)

@@ -3,10 +3,12 @@
 -- SQL-Commands Unit 0x05
 
 -- select default schema in MariaDB (comment out for PostgreSQL):
-USE ami_zone;
+-- USE ami_zone;
 -- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
+SET SEARCH_PATH = ami_zone;
 
+/*
+-- MySQL/MariaDB-specific
 -- Query schemas
 SHOW SCHEMAS;
 SHOW DATABASES;
@@ -38,7 +40,38 @@ USE ami_example;
 -- Schema is still empty
 SHOW TABLES FROM ami_example;
 
+*/
+
+-- PostgreSQL-specific
+
+SELECT schema_name
+FROM information_schema.schemata;
+
+CREATE SCHEMA ami_test;
+
+SELECT schema_name
+FROM information_schema.schemata
+WHERE schema_name = 'ami_test';
+
+DROP SCHEMA ami_test;
+
+--
+
+CREATE SCHEMA ami_example;
+
+SELECT schema_name
+FROM information_schema.schemata
+WHERE schema_name LIKE 'ami_%';
+
+SET SEARCH_PATH = ami_example;
+
+--
+
 -- Create 'objects' table
+
+/*
+ -- MySql
+
 CREATE TABLE objects (
   id int primary key,
   name char(10) unique not null,
@@ -49,34 +82,71 @@ CREATE TABLE objects (
   important boolean not null default true
 );
 SHOW COLUMNS FROM objects;
+*/
+
+-- PostgreSQL-specific
+CREATE TABLE objects (
+  id int primary key,
+  name varchar(10) unique not null,
+  comment varchar(255),
+  number int,
+  floating decimal(8,3) default 0.0,
+  created timestamp default now(),
+  important boolean not null default true
+);
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'objects'
+ORDER BY ordinal_position;
 
 -- Create sample data
 INSERT INTO objects (id,name) VALUES ('1','mueller');
 INSERT INTO objects (id,name,number) VALUES ('2','meier','3');
 SELECT * FROM objects;
 
-# Change table, add attributes
+-- Change table, add attributes
+
+/*
+-- MySql
 ALTER TABLE objects ADD (
   image blob,
   eps double default 0.01
 );
+ */
+ALTER TABLE objects
+  ADD COLUMN image bytea,
+  ADD COLUMN eps double precision DEFAULT 0.01;
+
 SELECT * FROM objects;
-SHOW COLUMNS FROM objects;
+-- SHOW COLUMNS FROM objects;
 
 -- Change default value
-ALTER TABLE objects MODIFY eps float default 0.002;
-SHOW COLUMNS FROM objects;
+-- ALTER TABLE objects MODIFY eps float default 0.002;
+-- SHOW COLUMNS FROM objects;
+
+ALTER TABLE objects
+  ALTER COLUMN eps TYPE double precision,
+  ALTER COLUMN eps SET DEFAULT 0.002;
+
 SELECT * FROM objects;
 
 -- Change name and default value
-ALTER TABLE objects CHANGE eps feps float default 0.003;
-SHOW COLUMNS FROM objects;
+-- ALTER TABLE objects CHANGE eps feps float default 0.003;
+-- SHOW COLUMNS FROM objects;
+
+ALTER TABLE objects
+  RENAME COLUMN eps TO feps;
+
+ALTER TABLE objects
+  ALTER COLUMN feps TYPE double precision,
+  ALTER COLUMN feps SET DEFAULT 0.003;
+
 SELECT * FROM objects;
 
 -- Delete attributes
 ALTER TABLE objects DROP feps;
 ALTER TABLE objects DROP image;
-SHOW COLUMNS FROM objects;
+-- SHOW COLUMNS FROM objects;
 SELECT * FROM objects;
 
 -- Rename table
@@ -89,7 +159,15 @@ SELECT * FROM elements;
 
 -- Remove table itself
 DROP TABLE elements;
-SHOW TABLES FROM ami_example;
+-- SHOW TABLES FROM ami_example;
+
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'elements';
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = current_schema();
 
 --
 
@@ -106,6 +184,7 @@ INSERT INTO person (person_id,name) VALUES ('12','LEA');
 SELECT * FROM person;
 
 -- Create table with foreign key and index
+/*
 CREATE TABLE pet (
 pet_id INT NOT NULL,
 name VARCHAR(10) NOT NULL CHECK (LENGTH(name) <= 10),  -- first version 50, checked version 10
@@ -114,6 +193,16 @@ PRIMARY KEY (pet_id),
 INDEX person_idx (person_id ASC),
 CONSTRAINT fk_person FOREIGN KEY
 (person_id) REFERENCES person (person_id) );
+*/
+CREATE TABLE pet (
+  pet_id   INT PRIMARY KEY,
+  name     VARCHAR(10) NOT NULL CHECK (char_length(name) <= 10),
+  person_id INT NULL,
+  CONSTRAINT fk_person
+    FOREIGN KEY (person_id) REFERENCES person (person_id)
+);
+
+CREATE INDEX person_idx ON pet (person_id); -- ASC is the default sort order
 
 -- Some data and a join
 INSERT INTO pet (pet_id,name,person_id) VALUES ('1','Wuff','11');
@@ -121,7 +210,7 @@ INSERT INTO pet (pet_id,name) VALUES ('2','Bello');
 SELECT * FROM pet M LEFT OUTER JOIN person F ON M.person_id=F.person_id;
 
 -- insert with check that fails
-INSERT INTO pet (pet_id,name,person_id) VALUES ('3','Mr. Robinson','11');
+INSERT INTO pet (pet_id,name,person_id) VALUES ('3','Mr. Rob','11');
 SELECT * FROM pet M;
 
 /*
@@ -139,8 +228,9 @@ INSERT INTO pet2 (pet_id,name,person_id) VALUES ('3','Mr. Robinson','11');
 */
 
 -- Clean-up
-DROP SCHEMA ami_example;
-SHOW SCHEMAS;
+-- DROP SCHEMA ami_example;
+DROP SCHEMA ami_example CASCADE;
+-- SHOW SCHEMAS;
 
 
 -- Database for ami_sport - you may need to adapt the data to your tables

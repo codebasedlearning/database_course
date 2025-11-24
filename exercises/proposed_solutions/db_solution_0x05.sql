@@ -3,16 +3,16 @@
 -- SQL-Solutions Unit 0x05
 
 -- select default schema in MariaDB (comment out for PostgreSQL):
-USE ami_zone;
+-- USE ami_zone;
 -- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
+SET SEARCH_PATH = ami_zone;
 
 -- A5.1:
 
 -- DROP SCHEMA ami_sport;
 CREATE SCHEMA ami_sport;
 SHOW SCHEMAS;
-USE ami_sport;
+-- USE ami_sport;
 
 -- A5.2:
 
