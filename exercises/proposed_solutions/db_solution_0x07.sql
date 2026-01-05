@@ -13,9 +13,11 @@
 -- 7.2
 
 CREATE SCHEMA ami_experiment;
-USE ami_experiment;
+-- USE ami_experiment;
+SET SEARCH_PATH = ami_experiment;
 
 -- create tables first
+/*
 CREATE TABLE IF NOT EXISTS experiment (
   id INT(11) NOT NULL,
   description VARCHAR(100) NULL DEFAULT NULL,
@@ -42,6 +44,25 @@ CREATE TABLE IF NOT EXISTS belongs_to (
   CONSTRAINT fk_is_used_in2
     FOREIGN KEY (data_id)
     REFERENCES data (id)
+);
+*/
+CREATE TABLE IF NOT EXISTS experiment (
+  id          integer PRIMARY KEY,
+  description varchar(100),
+  last_edited timestamp
+);
+
+CREATE TABLE IF NOT EXISTS data (
+  id            integer PRIMARY KEY,
+  file_path     varchar(250),
+  configuration varchar(250),
+  data_type     integer NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS belongs_to (
+  id            integer PRIMARY KEY,
+  experiment_id integer NOT NULL REFERENCES experiment(id),
+  data_id       integer NOT NULL REFERENCES data(id)
 );
 
 -- 7.3 insert data
@@ -130,5 +151,5 @@ delete from data where id in (select data_id from belongs_to where experiment_id
 
 -- 7.10 remove the schema
 
-drop schema ami_experiment;
+drop schema ami_experiment cascade;
 

@@ -10,7 +10,8 @@
 
 -- insert, update and delete --
 
-use ami_sport;
+-- use ami_sport;
+SET SEARCH_PATH = ami_sport;
 
 SELECT * FROM athlete;
 
@@ -23,28 +24,40 @@ INSERT INTO athlete (id, name, birthday, is_male)
 VALUES ('131', 'Pierre', '1991-12-24', '1');
 INSERT INTO athlete (id, name, birthday, is_male)
 VALUES (132, 'Rob', '1991-12-24', true);
+--INSERT INTO athlete (id, name, birthday)
+--VALUES (133, 'Pete', cast(now() AS date) - interval 20 year);
 INSERT INTO athlete (id, name, birthday)
-VALUES (133, 'Pete', cast(now() AS date) - interval 20 year);
-
+VALUES (133,'Pete',(CURRENT_DATE - INTERVAL '20 years')::timestamp);
 SELECT * FROM athlete;
 
 -- check value (one day after Pete)
-SELECT S.name,S.birthday+interval 1 day
-FROM athlete S WHERE S.name='Pete';
+-- SELECT S.name,S.birthday+interval 1 day
+-- FROM athlete S WHERE S.name='Pete';
+SELECT s.name, s.birthday + INTERVAL '1 day' FROM athlete s
+WHERE s.name = 'Pete';
 
 -- generate attribute values from other data
+--INSERT INTO athlete (id, name, birthday)
+--VALUES (134, 'Marc', (
+--  SELECT S.birthday+interval 1 day FROM athlete S
+--  WHERE S.name='Pete'
+--));
 INSERT INTO athlete (id, name, birthday)
-VALUES (134, 'Marc', (
-  SELECT S.birthday+interval 1 day FROM athlete S
-  WHERE S.name='Pete'
-));
+VALUES (134,'Marc',
+  (
+    SELECT s.birthday + INTERVAL '1 day'
+    FROM athlete s
+    WHERE s.name = 'Pete'
+  )
+);
+
 
 SELECT * FROM athlete where name='Pete' or name='Marc';
 
 -- create multiple records at once
 INSERT INTO athlete (id, name, birthday, prize_money) VALUES
   (135, 'Tick', '1992-02-21 15:00', 100.0),
-  (136, 'Trick', '1992-02-21 15:01', NULL),
+  (136, 'Trick', '1992-02-21 15:01', 0.0),
   (137, 'Track', '1992-02-21 15:02', 200.0);
 
 SELECT * FROM athlete;
@@ -81,11 +94,11 @@ FROM athlete S WHERE S.id>=138;
 
 -- modify records using subselects
 SELECT id, name, prize_money, prize_money % 1234 FROM athlete;
-SELECT max(prize_money % 1234) as 'max_prize_money' FROM athlete;  -- 1050
+SELECT max(prize_money % 1234) as max_prize_money FROM athlete;  -- 1050
 
 UPDATE athlete
 SET prize_money = (
-    SELECT max(prize_money % 1234) as 'max_prize_money'
+    SELECT max(prize_money % 1234) as max_prize_money
     FROM athlete
 ) WHERE id=139;
 
