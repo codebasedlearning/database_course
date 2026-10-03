@@ -2,9 +2,7 @@
 
 -- SQL-Commands Unit 0x02
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- all data
@@ -100,6 +98,14 @@ SELECT C.id,C.name, E.id, E.name
 
 -- outer join (full)
 SELECT C.id,C.name, E.id, E.name
+    FROM hr_cat C FULL OUTER JOIN hr_employee E
+    ON E.id = C.employee_id;
+
+-- the same as union of left and right outer join; this emulation is needed for DBMS
+-- without FULL OUTER JOIN (e.g. MySQL/MariaDB). Caution: UNION also removes duplicate
+-- rows that are legitimately part of the result, the exact emulation is
+-- LEFT JOIN ... UNION ALL ... RIGHT JOIN ... WHERE <left side> IS NULL
+SELECT C.id,C.name, E.id, E.name
     FROM hr_cat C LEFT OUTER JOIN hr_employee E
     ON E.id = C.employee_id
 union
@@ -127,12 +133,11 @@ SELECT O.id, O.customer_id, C.id, C.brand
     FROM shop_order O RIGHT OUTER JOIN shop_customer C
     ON O.customer_id=C.id;
 
-/*
 -- switch to ami_kemper
-use ami_kemper;
--- SET SEARCH_PATH = ami_kemper;
+SET SEARCH_PATH = ami_kemper;
 
--- natural join
+-- natural join, i.e. join on ALL columns with equal names; handy but fragile:
+-- Studenten NATURAL JOIN Professoren would join on 'Name' (and return nothing)
 SELECT R.* FROM hoeren R;
 SELECT S.* FROM studenten S;
 SELECT V.* FROM Vorlesungen V;
@@ -146,4 +151,6 @@ SELECT S.Name,V.Titel
     FROM Studenten S
     JOIN hoeren R ON S.MatrNr = R.MatrNr
     JOIN Vorlesungen V ON R.VorlNr = V.VorlNr;
-*/
+
+-- back to ami_zone
+SET SEARCH_PATH = ami_zone;

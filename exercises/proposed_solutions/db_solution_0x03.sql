@@ -2,9 +2,7 @@
 
 -- SQL-Solutions Unit 0x03
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- A3.1:
@@ -29,11 +27,11 @@ GROUP BY M.employee_id, V.name HAVING avg(M.salary)>50000;
 
 -- A3.2:
 SELECT * FROM shop_product;
-SELECT * FROM shop_product WHERE name like '%pizza%';
+SELECT * FROM shop_product WHERE name ilike '%pizza%';
 
 -- (a)
 SELECT count(id) as pizza, avg(price) as avg
-FROM shop_product WHERE name like '%pizza%';
+FROM shop_product WHERE name ilike '%pizza%';
 
 -- (b)
 SELECT * FROM shop_product WHERE category_id IN (1,2);

@@ -4,71 +4,79 @@
 -- -- ami_kemper -- --
 
 
--- Be careful here, because if you delete the schema,
--- all the data it contains will also be deleted.
+-- Be careful: this script (re)creates the schema, i.e. the schema and
+-- all data it contains (including your own tables in it) are deleted first.
+-- This makes the script safe to run again and again.
 
--- mariadb (implicit cascade)
--- drop schema ami_kemper;
--- postgres
--- drop schema ami_kemper CASCADE;
+drop schema if exists ami_kemper cascade;
+create schema ami_kemper;
 
-create schema if not exists ami_kemper;
-
-create table if not exists ami_kemper.Professoren
+create table ami_kemper.Professoren
 (
     PersNr   int         not null,
     Name     varchar(30) not null,
     Rang     varchar(10) not null,
     Standort varchar(20) not null,
-    Raum     int         null
+    Raum     int         null,
+    primary key (PersNr)
 );
 
-create table if not exists ami_kemper.Studenten
+create table ami_kemper.Studenten
 (
     MatrNr   int         not null,
     Name     varchar(30) not null,
-    Semester int         not null
+    Semester int         not null,
+    primary key (MatrNr)
 );
 
-create table if not exists ami_kemper.Vorlesungen
+create table ami_kemper.Vorlesungen
 (
     VorlNr     int         not null,
     Titel      varchar(30) not null,
     SWS        int         not null,
     gelesenVon int         null,
-    primary key (VorlNr)
+    primary key (VorlNr),
+    foreign key (gelesenVon) references ami_kemper.Professoren (PersNr)
 );
 
-create table if not exists ami_kemper.Assistenten
+create table ami_kemper.Assistenten
 (
     PersNr     int         not null,
     Name       varchar(30) not null,
     Fachgebiet varchar(30) not null,
     Boss       int         null,
-    primary key (PersNr)
+    primary key (PersNr),
+    foreign key (Boss) references ami_kemper.Professoren (PersNr)
 );
 
-create table if not exists ami_kemper.hoeren
+create table ami_kemper.hoeren
 (
     MatrNr int      not null,
     VorlNr int      not null,
-    primary key (MatrNr, VorlNr)
+    primary key (MatrNr, VorlNr),
+    foreign key (MatrNr) references ami_kemper.Studenten (MatrNr),
+    foreign key (VorlNr) references ami_kemper.Vorlesungen (VorlNr)
 );
 
-create table if not exists ami_kemper.pruefen
+create table ami_kemper.pruefen
 (
     MatrNr int           not null,
     VorlNr int           not null,
     PersNr int           not null,
     Note   decimal(2, 1) null,
-    primary key (MatrNr, VorlNr, PersNr)
+    primary key (MatrNr, VorlNr, PersNr),
+    foreign key (MatrNr) references ami_kemper.Studenten (MatrNr),
+    foreign key (VorlNr) references ami_kemper.Vorlesungen (VorlNr),
+    foreign key (PersNr) references ami_kemper.Professoren (PersNr)
 );
 
-create table if not exists ami_kemper.voraussetzen
+create table ami_kemper.voraussetzen
 (
     Vorgaenger int      not null,
     Nachfolger int      not null,
-    primary key (Vorgaenger, Nachfolger)
+    primary key (Vorgaenger, Nachfolger),
+    foreign key (Vorgaenger) references ami_kemper.Vorlesungen (VorlNr),
+    foreign key (Nachfolger) references ami_kemper.Vorlesungen (VorlNr)
 );
 
 insert into ami_kemper.Professoren (PersNr, Name, Rang, Standort, Raum)

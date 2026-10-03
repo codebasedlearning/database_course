@@ -2,14 +2,12 @@
 
 -- SQL-Commands Unit 0x04
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- search Mia or id of Mia -> id=5
 SELECT E.id, E.name FROM hr_employee E
-WHERE E.name like 'Mia';
+WHERE E.name = 'Mia';
 
 -- employees with Mia as their boss (ugly solution)
 SELECT E.id, E.name FROM hr_employee E
@@ -21,8 +19,8 @@ WHERE E.employee_id = (
     SELECT id FROM hr_employee WHERE name='Mia'
 );
 
--- using 'with' is also a way to organizing queries but technically
--- a Common Table Expressions (CTEs) is not considered a subselect or subquery
+-- using 'with' is also a way of organising queries, but technically
+-- a Common Table Expression (CTE) is not considered a subselect or subquery
 with Ids as (SELECT id mia FROM hr_employee WHERE name='Mia')
 SELECT E.id, E.name FROM hr_employee E, Ids
 WHERE E.employee_id = Ids.mia;
@@ -60,10 +58,20 @@ SELECT E.name, E.salary FROM hr_employee E
 WHERE E.salary IN (5000,12000,18000);
 
 -- group-functions with IN
-SELECT E.name, E.salary FROM hr_employee E
+-- Caution, typical mistake: this is NOT "the employees with the lowest salary in
+-- their team". IN compares with the minimum of ANY team, e.g. Leon (70000, team Ben)
+-- is listed because 70000 is the minimum of team Emma.
+SELECT E.name, E.salary, E.employee_id FROM hr_employee E
 WHERE E.salary IN (
     SELECT min(salary) FROM hr_employee
     GROUP BY employee_id
+);
+
+-- correct: compare with the minimum of the own team (correlated subselect, see below)
+SELECT E.name, E.salary, E.employee_id FROM hr_employee E
+WHERE E.salary = (
+    SELECT min(salary) FROM hr_employee X
+    WHERE X.employee_id = E.employee_id
 );
 
 -- ANY

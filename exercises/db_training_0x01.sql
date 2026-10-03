@@ -2,9 +2,7 @@
 
 -- SQL-Commands Unit 0x01
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- all data
@@ -18,7 +16,8 @@ SELECT * FROM shop_product;
 -- tables with alias
 SELECT P.* FROM shop_product P;
 
--- note column-names; MariaDB also allows 'alias'
+-- note column names (aliases): unquoted names are folded to lower case (Product -> product),
+-- double quotes keep case and allow blanks; single quotes are string literals, not names
 SELECT id as "IDX",
   name Product,
   price "Price [€]"
@@ -89,17 +88,15 @@ SELECT name, price FROM shop_product
 SELECT brand, risk_of_loss_percent FROM shop_customer
     WHERE risk_of_loss_percent is not null;
 
--- oder by, asc, desc
+-- order by, asc, desc
 SELECT name, price FROM shop_product
     WHERE category_id in (1,3,4) ORDER BY price; -- asc
 SELECT name, price FROM shop_product
     WHERE category_id in (1,3,4) ORDER BY price, name desc;
 
--- interactive usage (rand in MariaDB, random in PostgreSQL)
--- select now(), 1+2*3, rand();
+-- interactive usage, a SELECT does not need a FROM clause in PostgreSQL
+-- (Oracle needs 'FROM dual' here, PostgreSQL does not know DUAL)
 select now(), 1+2*3, random();
--- select now(), 1+2*3, rand() FROM dual;
-select now(), 1+2*3, random(); -- DUAL unknown;
 
 -- all tables in ami_zone
 
@@ -122,7 +119,7 @@ select * from shop_customer;
 select * from shop_order;
 select * from shop_connected_to;
 select * from shop_consists_of;
---      Assets (asst_)
+--      Assets (asset_)
 select * from asset_catalogue;
 select * from asset_inventory;
 select * from asset_inventory_furniture;

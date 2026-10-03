@@ -12,5 +12,4 @@ out/
 .vscode/
 
 ### dbms ###
-mariadb_data/
 postgres_data/

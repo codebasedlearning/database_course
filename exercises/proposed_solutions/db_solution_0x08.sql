@@ -2,9 +2,7 @@
 
 -- SQL-Solutions Unit 0x08
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 
@@ -13,7 +11,7 @@ SET SEARCH_PATH = ami_zone;
 -- 8.1 define a stored procedure
 
 -- if necessary
--- DROP FUNCTION IF EXISTS hello(text);
+-- DROP FUNCTION IF EXISTS hello(varchar);
 
 CREATE OR REPLACE FUNCTION hello(p_name varchar(50))
 RETURNS TABLE (message text)
@@ -27,21 +25,3 @@ SELECT * FROM hello('World!');
 
 -- clean up
 DROP FUNCTION hello(varchar);
-
-
-/* MySQL
-
--- if necessary
--- DROP PROCEDURE Hello;
-
-DELIMITER //
-CREATE PROCEDURE Hello(IN name varchar(50))
-BEGIN
-  SELECT CONCAT('Hello ', name) as 'message';
-END //
-DELIMITER ;
-
-CALL Hello('World!');
-
-DROP PROCEDURE Hello;
-*/

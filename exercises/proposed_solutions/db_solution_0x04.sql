@@ -2,17 +2,15 @@
 
 -- SQL-Solutions Unit 0x04
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- A4.1:
-SELECT * FROM shop_product WHERE name like 'Chips';
+SELECT * FROM shop_product WHERE name = 'Chips';
 SELECT * FROM shop_product P WHERE P.price=1.99;
 -- same as 'Chips' for 1.99
 SELECT P.name,P.price FROM shop_product P WHERE P.price = (
-    SELECT price FROM shop_product WHERE name like 'Chips'
+    SELECT price FROM shop_product WHERE name = 'Chips'
 ) and P.name<>'Chips';
 
 -- A4.2
@@ -70,12 +68,14 @@ SELECT * FROM shop_consists_of B;
 SELECT * FROM shop_product P WHERE NOT EXISTS(
     SELECT 'X' FROM shop_consists_of R WHERE R.product_id=P.id
 );
--- or, not correlated
+-- or, not correlated; caution: NOT IN returns NO rows at all as soon as the subselect
+-- contains a NULL (x NOT IN (1, NULL) is unknown, never true). product_id may be NULL,
+-- so NOT EXISTS is the safe choice, or exclude NULLs explicitly:
 select * from shop_product P
-where P.id not in (select product_id from shop_consists_of);
+where P.id not in (select product_id from shop_consists_of where product_id is not null);
 
 -- A4.8
-SELECT B.id as order,B.customer_id,C.brand,Q.sum FROM shop_order B JOIN (
+SELECT B.id as order_id,B.customer_id,C.brand,Q.sum FROM shop_order B JOIN (   -- 'order' is a reserved word
     SELECT R.order_id,sum(R.units*P.price) as sum
     FROM shop_consists_of R JOIN shop_product P on P.id = R.product_id
     GROUP BY R.order_id

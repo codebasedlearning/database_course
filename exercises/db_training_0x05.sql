@@ -2,51 +2,14 @@
 
 -- SQL-Commands Unit 0x05
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
-/*
--- MySQL/MariaDB-specific
 -- Query schemas
-SHOW SCHEMAS;
-SHOW DATABASES;
-
--- Have a look at the engines
-select * from information_schema.ENGINES;
-
--- Create schema, list, set as default, delete
-CREATE SCHEMA ami_test;
-SHOW SCHEMAS LIKE 'ami_%';
-USE ami_test;
-DROP SCHEMA ami_test;
-SHOW SCHEMAS;
-
--- Query tables in schema, adjust schema name if necessary
-SHOW TABLES FROM ami_zone;
-SHOW TABLES FROM ami_zone like 'shop%';
-SHOW TABLES FROM ami_zone like 'div%';
-
--- Query table structure
-SHOW COLUMNS FROM ami_zone.div_department;
-DESCRIBE ami_zone.div_department;
-
--- Create schema for the table commands
-CREATE SCHEMA ami_example;
-SHOW SCHEMAS LIKE 'ami_%';
-USE ami_example;
-
--- Schema is still empty
-SHOW TABLES FROM ami_example;
-
-*/
-
--- PostgreSQL-specific
-
 SELECT schema_name
 FROM information_schema.schemata;
 
+-- Create schema, list, delete
 CREATE SCHEMA ami_test;
 
 SELECT schema_name
@@ -55,8 +18,21 @@ WHERE schema_name = 'ami_test';
 
 DROP SCHEMA ami_test;
 
+-- Query tables in a schema
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'ami_zone' AND table_name LIKE 'shop%';
+
+-- Query table structure
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_schema = 'ami_zone' AND table_name = 'div_department'
+ORDER BY ordinal_position;
+
 --
 
+-- Create schema for the table commands (if it is left over from a previous run, delete it first)
+DROP SCHEMA IF EXISTS ami_example CASCADE;
 CREATE SCHEMA ami_example;
 
 SELECT schema_name
@@ -65,26 +41,14 @@ WHERE schema_name LIKE 'ami_%';
 
 SET SEARCH_PATH = ami_example;
 
+-- Schema is still empty
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = current_schema();
+
 --
 
 -- Create 'objects' table
-
-/*
- -- MySql
-
-CREATE TABLE objects (
-  id int primary key,
-  name char(10) unique not null,
-  comment varchar(255),
-  number int(5),
-  floating decimal(8,3) default 0.0,
-  created datetime default now(),
-  important boolean not null default true
-);
-SHOW COLUMNS FROM objects;
-*/
-
--- PostgreSQL-specific
 CREATE TABLE objects (
   id int primary key,
   name varchar(10) unique not null,
@@ -96,57 +60,40 @@ CREATE TABLE objects (
 );
 SELECT column_name, data_type, is_nullable, column_default
 FROM information_schema.columns
-WHERE table_name = 'objects'
+WHERE table_schema = current_schema() AND table_name = 'objects'
 ORDER BY ordinal_position;
 
 -- Create sample data
-INSERT INTO objects (id,name) VALUES ('1','mueller');
-INSERT INTO objects (id,name,number) VALUES ('2','meier','3');
+INSERT INTO objects (id,name) VALUES (1,'mueller');
+INSERT INTO objects (id,name,number) VALUES (2,'meier',3);
 SELECT * FROM objects;
 
 -- Change table, add attributes
-
-/*
--- MySql
-ALTER TABLE objects ADD (
-  image blob,
-  eps double default 0.01
-);
- */
 ALTER TABLE objects
   ADD COLUMN image bytea,
   ADD COLUMN eps double precision DEFAULT 0.01;
 
 SELECT * FROM objects;
--- SHOW COLUMNS FROM objects;
 
--- Change default value
--- ALTER TABLE objects MODIFY eps float default 0.002;
--- SHOW COLUMNS FROM objects;
-
+-- Change type and default value
 ALTER TABLE objects
-  ALTER COLUMN eps TYPE double precision,
+  ALTER COLUMN eps TYPE real,
   ALTER COLUMN eps SET DEFAULT 0.002;
 
 SELECT * FROM objects;
 
 -- Change name and default value
--- ALTER TABLE objects CHANGE eps feps float default 0.003;
--- SHOW COLUMNS FROM objects;
-
 ALTER TABLE objects
   RENAME COLUMN eps TO feps;
 
 ALTER TABLE objects
-  ALTER COLUMN feps TYPE double precision,
   ALTER COLUMN feps SET DEFAULT 0.003;
 
 SELECT * FROM objects;
 
 -- Delete attributes
-ALTER TABLE objects DROP feps;
-ALTER TABLE objects DROP image;
--- SHOW COLUMNS FROM objects;
+ALTER TABLE objects DROP COLUMN feps;
+ALTER TABLE objects DROP COLUMN image;
 SELECT * FROM objects;
 
 -- Rename table
@@ -159,11 +106,6 @@ SELECT * FROM elements;
 
 -- Remove table itself
 DROP TABLE elements;
--- SHOW TABLES FROM ami_example;
-
-SELECT column_name, data_type, is_nullable, column_default
-FROM information_schema.columns
-WHERE table_name = 'elements';
 
 SELECT table_name
 FROM information_schema.tables
@@ -173,95 +115,88 @@ WHERE table_schema = current_schema();
 
 -- Create tables with table constraints
 CREATE TABLE person (
-person_id INT NOT NULL,
-name VARCHAR(50) NOT NULL,
-PRIMARY KEY (person_id)
+  person_id INT NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  PRIMARY KEY (person_id)
 );
 
 -- Some data
-INSERT INTO person (person_id,name) VALUES ('11','MIA');
-INSERT INTO person (person_id,name) VALUES ('12','LEA');
+INSERT INTO person (person_id,name) VALUES (11,'MIA');
+INSERT INTO person (person_id,name) VALUES (12,'LEA');
 SELECT * FROM person;
 
--- Create table with foreign key and index
-/*
+-- Create table with foreign key, check constraint and index.
+-- The column itself would allow 50 characters, the CHECK constraint only 10.
 CREATE TABLE pet (
-pet_id INT NOT NULL,
-name VARCHAR(10) NOT NULL CHECK (LENGTH(name) <= 10),  -- first version 50, checked version 10
-person_id INT NULL,
-PRIMARY KEY (pet_id),
-INDEX person_idx (person_id ASC),
-CONSTRAINT fk_person FOREIGN KEY
-(person_id) REFERENCES person (person_id) );
-*/
-CREATE TABLE pet (
-  pet_id   INT PRIMARY KEY,
-  name     VARCHAR(10) NOT NULL CHECK (char_length(name) <= 10),
+  pet_id    INT PRIMARY KEY,
+  name      VARCHAR(50) NOT NULL,
   person_id INT NULL,
+  CONSTRAINT name_length_check CHECK (char_length(name) <= 10),
   CONSTRAINT fk_person
     FOREIGN KEY (person_id) REFERENCES person (person_id)
 );
 
+-- PostgreSQL does not create an index for a foreign key automatically (MySQL does)
 CREATE INDEX person_idx ON pet (person_id); -- ASC is the default sort order
 
 -- Some data and a join
-INSERT INTO pet (pet_id,name,person_id) VALUES ('1','Wuff','11');
-INSERT INTO pet (pet_id,name) VALUES ('2','Bello');
+INSERT INTO pet (pet_id,name,person_id) VALUES (1,'Wuff',11);
+INSERT INTO pet (pet_id,name) VALUES (2,'Bello');
 SELECT * FROM pet M LEFT OUTER JOIN person F ON M.person_id=F.person_id;
 
--- insert with check that fails
-INSERT INTO pet (pet_id,name,person_id) VALUES ('3','Mr. Rob','11');
+-- insert with check that succeeds ('Mr. Rob' has 7 characters)
+INSERT INTO pet (pet_id,name,person_id) VALUES (3,'Mr. Rob',11);
+
+-- expect-error: 'Mr. Robinson' has 12 characters, violates name_length_check
+INSERT INTO pet (pet_id,name,person_id) VALUES (4,'Mr. Robinson',11);
+
+-- expect-error: person 99 does not exist, violates fk_person
+INSERT INTO pet (pet_id,name,person_id) VALUES (5,'Mini',99);
+
 SELECT * FROM pet M;
 
-/*
-CREATE TABLE pet2 (
-pet_id INT NOT NULL,
-name VARCHAR(10) NOT NULL,
-person_id INT NULL,
-PRIMARY KEY (pet_id),
-INDEX person_idx (person_id ASC),
-CONSTRAINT nameLengthCheck CHECK (LENGTH(name) <= 10),
-CONSTRAINT fk_person2 FOREIGN KEY
-(person_id) REFERENCES person (person_id) );
+-- Clean-up: we keep schema ami_example with person and pet for unit 0x06.
+-- DROP SCHEMA ami_example CASCADE;
 
-INSERT INTO pet2 (pet_id,name,person_id) VALUES ('3','Mr. Robinson','11');
-*/
-
--- Clean-up
--- DROP SCHEMA ami_example;
-DROP SCHEMA ami_example CASCADE;
--- SHOW SCHEMAS;
+SET SEARCH_PATH = ami_zone;
 
 
--- Database for ami_sport - you may need to adapt the data to your tables
+-- Data for ami_sport (task 5.2) - adapt the column names to your own tables
 
 /*
+INSERT INTO athlete (id, name, birthday, is_male) VALUES
+  (101, 'Anna',  '1990-02-01', false),
+  (102, 'Olga',  '1991-03-01', false);
 
-INSERT INTO `athlete` (`id`, `name`, `birthday`, `is_male`) VALUES ('101', 'Anna', '1990-2-1', '0');
-INSERT INTO `athlete` (`id`, `name`, `birthday`, `is_male`) VALUES ('102', 'Olga', '1991-3-1', '0');
-INSERT INTO `athlete` (`id`, `name`, `birthday`, `prize_money`, `is_male`) VALUES ('111', 'Enie', '1992-4-1', '100', '0');
-INSERT INTO `athlete` (`id`, `name`, `birthday`, `prize_money`, `is_male`) VALUES ('112', 'Antje', '1993-5-1', '200', '0');
-INSERT INTO `athlete` (`id`, `name`, `birthday`, `prize_money`, `is_male`) VALUES ('121', 'Boris', '1990-6-1', '3000', '1');
-INSERT INTO `athlete` (`id`, `name`, `birthday`, `prize_money`, `is_male`) VALUES ('122', 'Ivan', '1991-7-1', '4000', '1');
+INSERT INTO athlete (id, name, birthday, prize_money, is_male) VALUES
+  (111, 'Enie',  '1992-04-01',  100, false),
+  (112, 'Antje', '1993-05-01',  200, false),
+  (121, 'Boris', '1990-06-01', 3000, true),
+  (122, 'Ivan',  '1991-07-01', 4000, true);
 
-INSERT INTO `team` (`id`, `name`) VALUES ('12345', 'Team NL');
-INSERT INTO `team` (`id`, `name`) VALUES ('98765', 'Team PL');
+INSERT INTO team (id, name) VALUES
+  (12345, 'Team NL'),
+  (98765, 'Team PL');
 
-INSERT INTO `competition` (`id`, `description`, `for_male`) VALUES ('56', 'Tennis Preliminary Round - Doubles', '0');
-INSERT INTO `competition` (`id`, `description`, `for_male`) VALUES ('98', 'Tennis Final - Singles', '1');
-INSERT INTO `competition` (`id`, `description`, `for_male`) VALUES ('99', 'Tennis Final - Singles', '0');
+INSERT INTO competition (id, description, for_male) VALUES
+  (56, 'Tennis Preliminary Round - Doubles', false),
+  (98, 'Tennis Final - Singles', true),
+  (99, 'Tennis Final - Singles', false);
 
-INSERT INTO `attends` (`id`, `athlete_id`, `team_id`, `competition_id`) VALUES ('1', '101', '98765', '56');
-INSERT INTO `attends` (`id`, `athlete_id`, `team_id`, `competition_id`) VALUES ('2', '102', '98765', '56');
-INSERT INTO `attends` (`id`, `athlete_id`, `team_id`, `competition_id`) VALUES ('3', '111', '12345', '56');
-INSERT INTO `attends` (`id`, `athlete_id`, `team_id`, `competition_id`) VALUES ('4', '112', '12345', '56');
-INSERT INTO `attends` (`id`, `athlete_id`, `competition_id`) VALUES ('5', '101', '99');
-INSERT INTO `attends` (`id`, `athlete_id`, `competition_id`) VALUES ('6', '111', '99');
-INSERT INTO `attends` (`id`, `athlete_id`, `competition_id`) VALUES ('7', '121', '98');
-INSERT INTO `attends` (`id`, `athlete_id`, `competition_id`) VALUES ('8', '122', '98');
+INSERT INTO attends (id, athlete_id, team_id, competition_id) VALUES
+  (1, 101, 98765, 56),
+  (2, 102, 98765, 56),
+  (3, 111, 12345, 56),
+  (4, 112, 12345, 56);
 
-INSERT INTO `referees` (`id`, `athlete_id`, `competition_id`) VALUES ('1', '121', '56');
-INSERT INTO `referees` (`id`, `athlete_id`, `competition_id`) VALUES ('2', '122', '99');
-INSERT INTO `referees` (`id`, `athlete_id`, `competition_id`) VALUES ('3', '101', '98');
+INSERT INTO attends (id, athlete_id, competition_id) VALUES
+  (5, 101, 99),
+  (6, 111, 99),
+  (7, 121, 98),
+  (8, 122, 98);
 
+INSERT INTO referees (id, athlete_id, competition_id) VALUES
+  (1, 121, 56),
+  (2, 122, 99),
+  (3, 101, 98);
 */

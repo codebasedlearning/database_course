@@ -1,37 +1,34 @@
-# (C) 2025 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
+# (C) 2026 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
 #
-# docker compose -f docker/compose.yml up postgres -d
-# docker compose -f docker/compose.yml down postgres
+# Start / stop the DBMS (run from the repository root):
+#   docker compose -f docker/compose.yml up -d
+#   docker compose -f docker/compose.yml down
 #
-# Compose V2
+# Podman: 'podman compose -f docker/compose.yml up -d' works the same way.
+#
+# On the very first start (empty data folder), all scripts in ../preparation
+# are executed automatically, i.e. the sample schemas are loaded for you.
+# To start from scratch: stop the container and delete the folder postgres_data.
 
-# version: "3"                  # maybe needed in older versions
-name: ami_database_training # comment out in older versions
+name: ami_database_training
 
 services:
-  mariadb:
-    image: mariadb:latest
-    # userns_mode: keep-id  # needed for podman on macOS
-    container_name: ami_data_warehouse_mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_ROOT_HOST: "%"
-    ports:
-      - "3312:3306"
-    volumes:
-      - ../mariadb_data:/var/lib/mysql
-    restart: always
-
   postgres:
-    image: postgres:latest
-    # userns_mode: keep-id  # needed for podman on macOS
-    container_name: ami_data_warehouse_postgres
+    # Pinned on purpose: 'latest' would switch to a new major version mid-semester.
+    image: postgres:18
+    # userns_mode: keep-id  # needed for podman on macOS in case of permission errors.
+    container_name: ami_database_postgres
     environment:
       POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      # the sample data goes into the default database 'postgres' (otherwise root)
+      POSTGRES_DB: postgres
     ports:
-      - "5438:5432"
+      # 127.0.0.1 = reachable from your own machine only, not from the network.
+      - "127.0.0.1:5438:5432"
     volumes:
-      # - ../postgres_data:/var/lib/postgresql/data/ # postgres version < 18
-      - ../postgres_data:/var/lib/postgresql/data/18/docker
-    restart: always
+      # PostgreSQL >= 18: mount the parent folder, the data lives in .../18/docker
+      - ../postgres_data:/var/lib/postgresql
+      # sample data, executed once on first start (alphabetical order)
+      - ../preparation:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped

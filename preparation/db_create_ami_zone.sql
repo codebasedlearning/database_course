@@ -4,20 +4,17 @@
 -- -- ami_zone -- --
 
 
--- Be careful here, because if you delete the schema,
--- all the daata it contains will also be deleted.
+-- Be careful: this script (re)creates the schema, i.e. the schema and
+-- all data it contains (including your own tables in it) are deleted first.
+-- This makes the script safe to run again and again.
 
--- mariadb (implicit cascade)
--- drop schema ami_zone;
--- postgres
--- drop schema ami_zone CASCADE;
-
-create schema if not exists ami_zone;
+drop schema if exists ami_zone cascade;
+create schema ami_zone;
 
 -- -- div -- --
 
 -- location
-create table if not exists ami_zone.div_location
+create table ami_zone.div_location
 (
     id           int          not null,
     place        varchar(100) not null,
@@ -29,10 +26,10 @@ values  (1, 'Aachen', 'AC'),
         (2, 'Jülich', 'JÜL'),
         (3, 'Köln', 'K'),
         (4, 'Berlin', 'B');
--- select if(count(id)=4 and max(id)=4,'ok','nok') from ami_zone.div_location;
+-- select case when count(id)=4 and max(id)=4 then 'ok' else 'nok' end from ami_zone.div_location;
 
 -- department
-create table if not exists ami_zone.div_department
+create table ami_zone.div_department
 (
     id           int          not null,
     name         varchar(100) not null,
@@ -48,10 +45,10 @@ values  (1, 'Board', 'BR', 'BR'),
         (5, 'Research and Development', 'RD', 'CTO'),
         (6, 'Project Management', 'PM', 'COO'),
         (7, 'Vehicle Fleet', 'VF', 'COO');
--- select if(count(id)=7 and max(id)=7,'ok','nok') from ami_zone.div_department;
+-- select case when count(id)=7 and max(id)=7 then 'ok' else 'nok' end from ami_zone.div_department;
 
 -- room
-create table if not exists ami_zone.div_room
+create table ami_zone.div_room
 (
     location_id int           not null,
     room        varchar(100)  not null,
@@ -66,10 +63,10 @@ values  (3, '102.1', 2),
         (3, '103.1', 2),
         (4, '102.1', 1),
         (4, '103.1', 1);
--- select if(count(location_id)=4 and max(location_id)=4,'ok','nok') from ami_zone.div_room;
+-- select case when count(location_id)=4 and max(location_id)=4 then 'ok' else 'nok' end from ami_zone.div_room;
 
 -- located_in
-create table if not exists ami_zone.div_located_in
+create table ami_zone.div_located_in
 (
     id             int               not null,
     department_id  int               null,
@@ -95,13 +92,13 @@ values  (1, 1, 4, 1),
         (9, 5, 2, 0),
         (10, 6, 3, 0),
         (11, 6, 4, 1);
--- select if(count(id)=11 and max(id)=11,'ok','nok') from ami_zone.div_located_in;
+-- select case when count(id)=11 and max(id)=11 then 'ok' else 'nok' end from ami_zone.div_located_in;
 
 
 -- -- hr -- --
 
 -- task
-create table if not exists ami_zone.hr_task
+create table ami_zone.hr_task
 (
     id   int          not null,
     name varchar(100) not null,
@@ -113,10 +110,10 @@ values  (1, 'Regular tasks'),
         (3, 'Project Alpha'),
         (4, 'Project Zerberus'),
         (5, 'Project XCoin');
--- select if(count(id)=5 and max(id)=5,'ok','nok') from ami_zone.hr_task;
+-- select case when count(id)=5 and max(id)=5 then 'ok' else 'nok' end from ami_zone.hr_task;
 
 -- team
-create table if not exists ami_zone.hr_team
+create table ami_zone.hr_team
 (
     id           int          not null,
     name         varchar(100) not null,
@@ -130,10 +127,10 @@ values  (1, 'Board', 'BR'),
         (4, 'Apprentice', 'AP'),
         (5, 'Student', 'ST'),
         (6, 'Freelancer', 'FL');
--- select if(count(id)=6 and max(id)=6,'ok','nok') from ami_zone.hr_team;
+-- select case when count(id)=6 and max(id)=6 then 'ok' else 'nok' end from ami_zone.hr_team;
 
 -- employee, note: there are limits in 'on update' and 'on delete'
-create table if not exists ami_zone.hr_employee
+create table ami_zone.hr_employee
 (
     id          int            not null,
     name        varchar(100)   not null,
@@ -166,13 +163,13 @@ values  (1, 'Board', 0.00, 1, 'Board (artificial)'),
         (18, 'Lukas', 50000.00, 13, 'Dev - Team Leon'),
         (19, 'Lena', 50000.00, 13, 'Dev - Team Leon'),
         (20, 'Leonie', 18000.00, 13, 'Dev - Team Leon - Apprentice'),
-        (21, 'Lilly', 24000.00, 8, 'Marketing - Team Sophia '),
-        (22, 'Felix', 60000.00, 8, 'Sales - Team Sophia'),
-        (23, 'Tim', 60000.00, 8, 'Sales - Team Sophia');
--- select if(count(id)=23 and max(id)=23,'ok','nok') from ami_zone.hr_employee;
+        (21, 'Lilly', 24000.00, 8, 'Marketing - Team Sofia'),
+        (22, 'Felix', 60000.00, 8, 'Sales - Team Sofia'),
+        (23, 'Tim', 60000.00, 8, 'Sales - Team Sofia');
+-- select case when count(id)=23 and max(id)=23 then 'ok' else 'nok' end from ami_zone.hr_employee;
 
 -- part_of
-create table if not exists ami_zone.hr_part_of
+create table ami_zone.hr_part_of
 (
     id          int not null,
     employee_id int null,
@@ -219,10 +216,10 @@ values  (1, 1, 1),
         (31, 21, 6),
         (32, 22, 3),
         (33, 23, 3);
--- select if(count(id)=33 and max(id)=33,'ok','nok') from ami_zone.hr_part_of;
+-- select case when count(id)=33 and max(id)=33 then 'ok' else 'nok' end from ami_zone.hr_part_of;
 
 -- cat
-create table if not exists ami_zone.hr_cat
+create table ami_zone.hr_cat
 (
     id          int         not null,
     name        varchar(30) not null,
@@ -236,10 +233,10 @@ insert into ami_zone.hr_cat (id, name, employee_id)
 values  (1, 'Mauzi', 2),
         (2, 'Mini', 17),
         (3, 'Roy', null);
--- select if(count(id)=3 and max(id)=3,'ok','nok') from ami_zone.hr_cat;
+-- select case when count(id)=3 and max(id)=3 then 'ok' else 'nok' end from ami_zone.hr_cat;
 
 -- works_in_at
-create table if not exists ami_zone.hr_works_in_at
+create table ami_zone.hr_works_in_at
 (
     id             int                         not null,
     employee_id    int                         null,
@@ -290,13 +287,13 @@ values  (1, 1, 1, 1, 0.00),
         (30, 21, 5, 4, 10.00),
         (31, 22, 3, 1, 40.00),
         (32, 23, 3, 1, 40.00);
--- select if(count(id)=32 and max(id)=32,'ok','nok') from ami_zone.hr_works_in_at;
+-- select case when count(id)=32 and max(id)=32 then 'ok' else 'nok' end from ami_zone.hr_works_in_at;
 
 
 -- -- assets -- --
 
 -- catalogue
-create table if not exists ami_zone.asset_catalogue
+create table ami_zone.asset_catalogue
 (
     id                int          not null,
     item              varchar(100) not null,
@@ -313,10 +310,10 @@ values  (1, 'Chair JÄRVFJÄLLET', '892.756.23'),
         (7, 'Mobile iPhone Pro', 'MWC22ZD/A'),
         (8, 'Mobile iPhone Max', 'MWHQ2ZD/A'),
         (9, 'Mobile Pixel', 'GA01188-DE');
--- select if(count(id)=9 and max(id)=9,'ok','nok') from ami_zone.asset_catalogue;
+-- select case when count(id)=9 and max(id)=9 then 'ok' else 'nok' end from ami_zone.asset_catalogue;
 
 -- inventory
-create table if not exists ami_zone.asset_inventory
+create table ami_zone.asset_inventory
 (
     id           int                         not null,
     barcode      varchar(100)                not null,
@@ -335,10 +332,10 @@ values  (1, 'C-001', 193.00, 1),
         (5, 'M-001', 1120.00, 7),
         (6, 'M-002', 1120.00, 7),
         (7, 'M-003', 551.00, 9);
--- select if(count(id)=7 and max(id)=7,'ok','nok') from ami_zone.asset_inventory;
+-- select case when count(id)=7 and max(id)=7 then 'ok' else 'nok' end from ami_zone.asset_inventory;
 
 -- inventory_furniture
-create table if not exists ami_zone.asset_inventory_furniture
+create table ami_zone.asset_inventory_furniture
 (
     id          int          not null,
     color       varchar(20)  null,
@@ -357,10 +354,10 @@ values  (1, 'brown', 3, '102.1'),
         (2, 'white', 3, '103.1'),
         (3, 'black', 4, '103.1'),
         (4, 'black', 4, '102.1');
--- select if(count(id)=7 and max(id)=7,'ok','nok') from ami_zone.asset_inventory_furniture;
+-- select case when count(id)=4 and max(id)=4 then 'ok' else 'nok' end from ami_zone.asset_inventory_furniture;
 
 -- inventory_mobile
-create table if not exists ami_zone.asset_inventory_mobile
+create table ami_zone.asset_inventory_mobile
 (
     id          int          not null,
     os          varchar(100) not null,
@@ -377,13 +374,13 @@ insert into ami_zone.asset_inventory_mobile (id, os, employee_id)
 values  (5, 'iOS', 2),
         (6, 'iOS', 3),
         (7, 'Android', 4);
--- select if(count(id)=3 and max(id)=7,'ok','nok') from ami_zone.asset_inventory_mobile;
+-- select case when count(id)=3 and max(id)=7 then 'ok' else 'nok' end from ami_zone.asset_inventory_mobile;
 
 
 -- -- shop -- --
 
 -- category
-create table if not exists ami_zone.shop_category
+create table ami_zone.shop_category
 (
     id   int          not null,
     name varchar(100) not null,
@@ -402,10 +399,10 @@ values  (1, 'Frozen Goods'),
         (10, 'Baked Goods'),
         (11, 'Magazines'),
         (12, 'Services');
--- select if(count(id)=12 and max(id)=12,'ok','nok') from ami_zone.shop_category;
+-- select case when count(id)=12 and max(id)=12 then 'ok' else 'nok' end from ami_zone.shop_category;
 
 -- product
-create table if not exists ami_zone.shop_product
+create table ami_zone.shop_product
 (
     id          int                         not null,
     name        varchar(100)                not null,
@@ -438,7 +435,7 @@ values  (1, 'Spinach', 1, 'PK', 1.99, 0.07),
         (18, 'Water', 5, 'PC', 0.99, 0.19),
         (19, 'Grill Sausages', 6, 'PK', 3.55, 0.07),
         (20, 'Meatloaf', 6, 'PK', 2.79, 0.07),
-        (21, 'Fricandels', 6, 'PK', 3.49, 0.07),
+        (21, 'Frikandels', 6, 'PK', 3.49, 0.07),
         (22, 'Chips', 7, 'PK', 1.99, 0.07),
         (23, 'Salt Sticks', 7, 'PK', 1.79, 0.07),
         (24, 'Jelly Babies', 7, 'PK', 1.59, 0.07),
@@ -458,10 +455,10 @@ values  (1, 'Spinach', 1, 'PK', 1.99, 0.07),
         (38, 'Computerbild', 11, 'PC', 2.20, 0.07),
         (39, 'Zeit', 11, 'PC', 4.20, 0.07),
         (40, 'GameStar', 11, 'PC', 6.50, 0.07);
--- select if(count(id)=40 and max(id)=40,'ok','nok') from ami_zone.shop_product;
+-- select case when count(id)=40 and max(id)=40 then 'ok' else 'nok' end from ami_zone.shop_product;
 
 -- customer
-create table if not exists ami_zone.shop_customer
+create table ami_zone.shop_customer
 (
     id                   int                        not null,
     brand                varchar(100)               not null,
@@ -477,15 +474,15 @@ values  (1, 'Bayer', 1.00, null),
         (5, 'Deutsche Bank', 0.00, null),
         (6, 'Börse', 0.00, null),
         (7, 'E.ON', 1.00, null),
-        (8, 'Infinion', 2.00, null),
+        (8, 'Infineon', 2.00, null),
         (9, 'Lufthansa', 2.00, null),
         (10, 'RWE', 1.00, 2.00),
         (11, 'SAP', 2.00, null),
         (12, 'Sparkasse', 10.00, null);
--- select if(count(id)=12 and max(id)=12,'ok','nok') from ami_zone.shop_customer;
+-- select case when count(id)=12 and max(id)=12 then 'ok' else 'nok' end from ami_zone.shop_customer;
 
 -- connected_to
-create table if not exists ami_zone.shop_connected_to
+create table ami_zone.shop_connected_to
 (
     id            int not null,
     customer_a_id int null,
@@ -511,15 +508,15 @@ values  (1001, 1, 6),
         (1010, 10, 11),
         (1011, 7, 11),
         (1012, 11, 8);
--- select if(count(id)=12 and max(id)=1012,'ok','nok') from ami_zone.shop_connected_to;
+-- select case when count(id)=12 and max(id)=1012 then 'ok' else 'nok' end from ami_zone.shop_connected_to;
 
 -- order
-create table if not exists ami_zone.shop_order
+create table ami_zone.shop_order
 (
     id            int  not null,
     customer_id   int  null,
     employee_id   int  null, -- comment 'agent',
-    delivery_time time not null,
+    delivery_time timestamp not null,
     primary key (id),
     constraint shop_order_hr_employee_id_fk
         foreign key (employee_id) references ami_zone.hr_employee (id)
@@ -529,19 +526,22 @@ create table if not exists ami_zone.shop_order
             on update cascade on delete set null
 );
 insert into ami_zone.shop_order (id, customer_id, employee_id, delivery_time)
-values  (1, 12, 10, '13:14:00'),
-        (2, 12, 11, '17:38:00'),
-        (3, 7, 10, '08:22:00');
--- select if(count(id)=3 and max(id)=3,'ok','nok') from ami_zone.shop_order;
+values  (1, 12, 10, '2025-10-13 13:14:00'),
+        (2, 12, 11, '2025-10-13 17:38:00'),
+        (3, 7, 10, '2025-10-14 08:22:00');
+-- select case when count(id)=3 and max(id)=3 then 'ok' else 'nok' end from ami_zone.shop_order;
 
 -- consists_of
-create table if not exists ami_zone.shop_consists_of
+create table ami_zone.shop_consists_of
 (
     id         int                         not null,
     order_id   int                         null,
     product_id int                         null,
     units      decimal(12, 2) default 1.00 not null,
     primary key (id),
+    constraint consists_of_order_id_fk
+        foreign key (order_id) references ami_zone.shop_order (id)
+            on update cascade on delete cascade,
     constraint consists_of_product_id_fk
         foreign key (product_id) references ami_zone.shop_product (id)
             on update cascade on delete set null
@@ -557,6 +557,6 @@ values  (1, 1, 15, 12.00),
         (8, 3, 15, 6.00),
         (9, 3, 17, 12.00),
         (10, 3, 18, 12.00);
--- select if(count(id)=10 and max(id)=10,'ok','nok') from ami_zone.shop_consists_of;
+-- select case when count(id)=10 and max(id)=10 then 'ok' else 'nok' end from ami_zone.shop_consists_of;
 
 -- -- ami_zone done -- --

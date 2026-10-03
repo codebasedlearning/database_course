@@ -2,10 +2,6 @@
 
 -- SQL-Solutions Unit 0x07
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
 
 
 -- 7.1 ER-Model, no SQL
@@ -13,39 +9,9 @@
 -- 7.2
 
 CREATE SCHEMA ami_experiment;
--- USE ami_experiment;
 SET SEARCH_PATH = ami_experiment;
 
 -- create tables first
-/*
-CREATE TABLE IF NOT EXISTS experiment (
-  id INT(11) NOT NULL,
-  description VARCHAR(100) NULL DEFAULT NULL,
-  last_edited DATETIME NULL DEFAULT NULL,
-  PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS data (
-  id INT(11) NOT NULL,
-  file_path VARCHAR(250) NULL DEFAULT NULL,
-  configuration VARCHAR(250) NULL DEFAULT NULL,
-  data_type INT(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS belongs_to (
-  id INT(11) NOT NULL,
-  experiment_id INT(11) NOT NULL,
-  data_id INT(11) NOT NULL,
-  PRIMARY KEY (id),
-  CONSTRAINT fk_is_used_in1
-    FOREIGN KEY (experiment_id)
-    REFERENCES experiment (id),
-  CONSTRAINT fk_is_used_in2
-    FOREIGN KEY (data_id)
-    REFERENCES data (id)
-);
-*/
 CREATE TABLE IF NOT EXISTS experiment (
   id          integer PRIMARY KEY,
   description varchar(100),
@@ -93,7 +59,7 @@ select * from experiment;
 select * from data;
 select * from belongs_to;
 
--- 7.4 update date
+-- 7.4 update date (search the id, do not hardcode it)
 
 -- looking for the id
 SELECT id from experiment where description like 'Cold Fusion';
@@ -106,6 +72,7 @@ where id=(SELECT id from experiment where description like 'Cold Fusion');
 select * from experiment;
 
 -- note: in an exam, the id should never be specified explicitly, but always searched for using subselect
+-- (this also applies to the following tasks)
 
 -- 7.5
 
@@ -121,7 +88,8 @@ select * from data;
 insert into data (id,file_path,configuration,data_type)
     select D.id+3,concat(D.file_path,'_V2'),D.configuration,D.data_type
     from belongs_to R join data D on R.data_id=D.id
-where R.experiment_id=15 and D.data_type=2;
+where R.experiment_id=(SELECT id from experiment where description = 'Cold Fusion')
+  and D.data_type=2;
 
 select * from data where id>44;
 
@@ -129,11 +97,13 @@ select * from data where id>44;
 
 -- what data to insert
 select R.id,R.experiment_id,R.data_id from belongs_to R join data D on R.data_id=D.id
-where R.experiment_id=15 and D.data_type=2;
+where R.experiment_id=(SELECT id from experiment where description = 'Cold Fusion')
+  and D.data_type=2;
 
 insert into belongs_to (id,experiment_id,data_id)
 select R.id+5,R.experiment_id,R.data_id+3 from belongs_to R join data D on R.data_id=D.id
-where R.experiment_id=15 and D.data_type=2;
+where R.experiment_id=(SELECT id from experiment where description = 'Cold Fusion')
+  and D.data_type=2;
 
 select * from belongs_to R where id>=8;
 
@@ -142,12 +112,38 @@ select * from belongs_to R where id>=8;
 select D.id,D.file_path,D.configuration from belongs_to R
 join data D on R.data_id=D.id
 join experiment E on R.experiment_id=E.id
-where E.id=15;
+where E.description = 'Cold Fusion';
 
 -- 7.9 delete
 
-delete from belongs_to where experiment_id=15;
-delete from data where id in (select data_id from belongs_to where experiment_id=15);
+-- Caution, the obvious order does not work:
+--   delete from belongs_to where experiment_id=...;
+--   delete from data where id in (select data_id from belongs_to where experiment_id=...);
+-- after the first command the subselect is empty, i.e. no data is deleted at all.
+-- Also, data 34 is used by experiment 16 as well and must not be deleted.
+
+-- first the data that belongs to 'Cold Fusion' only ...
+-- expect-error: still referenced by belongs_to, the links must go first
+delete from data D
+where D.id in (select data_id from belongs_to
+               where experiment_id=(SELECT id from experiment where description = 'Cold Fusion'))
+  and not exists (select 1 from belongs_to B
+                  where B.data_id=D.id
+                    and B.experiment_id<>(SELECT id from experiment where description = 'Cold Fusion'));
+
+-- ... so the order is: remember the data ids, delete the links, then the data.
+-- In PostgreSQL this can be done in one statement (data-modifying CTE):
+with cold as (select id from experiment where description = 'Cold Fusion'),
+     gone as (delete from belongs_to where experiment_id = (select id from cold)
+              returning data_id)
+delete from data D
+where D.id in (select data_id from gone)
+  and not exists (select 1 from belongs_to B          -- sees the state before the CTE
+                  where B.data_id = D.id
+                    and B.experiment_id <> (select id from cold));
+
+select * from data;
+select * from belongs_to;
 
 -- 7.10 remove the schema
 

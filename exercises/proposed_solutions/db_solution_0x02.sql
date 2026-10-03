@@ -2,9 +2,7 @@
 
 -- SQL-Solutions Unit 0x02
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- A2.1:
@@ -51,7 +49,6 @@ SELECT D.name, L.place
     LEFT OUTER JOIN div_located_in LI on D.id = LI.department_id
     LEFT OUTER JOIN div_location L on LI.location_id = L.id
     WHERE L.place is null;
---    WHERE isnull(L.place);
 
 -- A2.3:
 SELECT * FROM hr_employee;
@@ -77,10 +74,9 @@ SELECT C1.brand, C2.brand
     FROM shop_customer C1
              JOIN shop_connected_to CT on C1.id = CT.customer_a_id
              JOIN shop_customer C2 on C2.id = CT.customer_b_id
-WHERE C1.brand like '%bank%' or C1.brand like '%kasse%';
+WHERE C1.brand ilike '%bank%' or C1.brand ilike '%kasse%';   -- ilike: also 'Deutsche Bank'
 -- b)
 SELECT C.brand
     FROM shop_customer C
     LEFT OUTER JOIN shop_connected_to CT on C.id = CT.customer_a_id
     WHERE CT.customer_b_id is null;
---    WHERE isnull(CT.customer_b_id);

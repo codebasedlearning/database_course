@@ -2,15 +2,12 @@
 
 -- SQL-Commands Unit 0x07
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
--- SET SEARCH_PATH = ami_zone;
 
 
 -- insert, update and delete --
 
--- use ami_sport;
+-- This unit needs schema ami_sport with your tables and data from tasks 5.1 and 5.2
+-- (or see proposed_solutions/db_solution_0x05.sql).
 SET SEARCH_PATH = ami_sport;
 
 SELECT * FROM athlete;
@@ -21,27 +18,18 @@ START TRANSACTION;
 
 -- create data (if the data exists, delete first; see below).
 INSERT INTO athlete (id, name, birthday, is_male)
-VALUES ('131', 'Pierre', '1991-12-24', '1');
+VALUES (131, 'Pierre', '1991-12-24', true);
 INSERT INTO athlete (id, name, birthday, is_male)
 VALUES (132, 'Rob', '1991-12-24', true);
---INSERT INTO athlete (id, name, birthday)
---VALUES (133, 'Pete', cast(now() AS date) - interval 20 year);
 INSERT INTO athlete (id, name, birthday)
 VALUES (133,'Pete',(CURRENT_DATE - INTERVAL '20 years')::timestamp);
 SELECT * FROM athlete;
 
 -- check value (one day after Pete)
--- SELECT S.name,S.birthday+interval 1 day
--- FROM athlete S WHERE S.name='Pete';
 SELECT s.name, s.birthday + INTERVAL '1 day' FROM athlete s
 WHERE s.name = 'Pete';
 
 -- generate attribute values from other data
---INSERT INTO athlete (id, name, birthday)
---VALUES (134, 'Marc', (
---  SELECT S.birthday+interval 1 day FROM athlete S
---  WHERE S.name='Pete'
---));
 INSERT INTO athlete (id, name, birthday)
 VALUES (134,'Marc',
   (
@@ -109,8 +97,12 @@ DELETE FROM athlete WHERE id>130;
 
 SELECT * FROM athlete;
 
--- unsafe
+-- unsafe, a DELETE without WHERE deletes everything... if it is allowed to:
+-- here the foreign keys of attends and referees prevent it.
+-- expect-error: violates foreign key constraint fk1 on table attends
 DELETE FROM athlete;
+
+-- the error aborted the transaction, only ROLLBACK is possible now
 
 ROLLBACK;
 

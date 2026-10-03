@@ -2,9 +2,7 @@
 
 -- SQL-Solutions Unit 0x01
 
--- select default schema in MariaDB (comment out for PostgreSQL):
--- USE ami_zone;
--- select default schema in PostgreSQL (comment out for MariaDB):
+-- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
 -- A1.1:
@@ -22,6 +20,9 @@ select count(distinct vat) from shop_product;
 -- A1.3
 select brand, discount_percent from shop_customer
     where brand like '%bank%' or brand like '%Bank%' or brand like '%Sparkasse%';
+-- or, case-insensitive with ILIKE (PostgreSQL)
+select brand, discount_percent from shop_customer
+    where brand ilike '%bank%' or brand ilike '%sparkasse%';
 
 -- A1.4
 select * from hr_employee
