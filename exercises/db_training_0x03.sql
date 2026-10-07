@@ -19,16 +19,18 @@ SELECT count(price), avg(price) FROM shop_product WHERE category_id=1;
 SELECT count(distinct price), avg(distinct price) FROM shop_product WHERE category_id=1;
 
 -- Use Group Functions on grouped data.
+-- Note: without ORDER BY the order of the groups is undefined.
 SELECT count(price),category_id,min(price),max(price),avg(price) FROM shop_product
-GROUP BY category_id;
+GROUP BY category_id ORDER BY category_id;
 
 -- Use Group Functions on grouped data of a selection.
 SELECT count(price),category_id,min(price),max(price),avg(price) FROM shop_product
-WHERE category_id IN (1,2,4) GROUP BY category_id;
+WHERE category_id IN (1,2,4) GROUP BY category_id ORDER BY category_id;
 
 -- Use Group Functions on grouped data with condition.
 SELECT count(price),category_id,min(price),max(price),avg(price) FROM shop_product
-WHERE category_id IN (1,2,4) GROUP BY category_id HAVING min(price)>1;
+WHERE category_id IN (1,2,4) GROUP BY category_id HAVING min(price)>1
+ORDER BY category_id;
 
 -- Use Group Functions correctly.
 SELECT name, category_id, price, unit FROM shop_product;
@@ -73,4 +75,5 @@ WHERE C.name ILIKE '%drinks';
 -- C.name must be grouped as well (P.category_id alone is not enough for PostgreSQL)
 SELECT count(P.price),P.category_id,avg(P.price),C.name FROM shop_product P
 INNER JOIN shop_category C ON P.category_id=C.id
-WHERE C.name ILIKE '%drinks' GROUP BY P.category_id, C.name;
+WHERE C.name ILIKE '%drinks' GROUP BY P.category_id, C.name
+ORDER BY P.category_id;

@@ -38,12 +38,12 @@ WHERE EXISTS(
 -- A4.4
 SELECT * FROM hr_employee;
 SELECT * FROM hr_works_in_at;
-SELECT * FROM div_department WHERE name like 'Finance';
+SELECT * FROM div_department WHERE name = 'Finance';
 SELECT * FROM hr_task WHERE name like '% XCoin';
 -- who works on something like XCoin in finance
 SELECT E.* FROM hr_works_in_at W JOIN hr_employee E on W.employee_id = E.id
 WHERE W.department_id = (
-    SELECT id FROM div_department WHERE name like 'Finance'
+    SELECT id FROM div_department WHERE name = 'Finance'
 ) and W.task_id = (
     SELECT id FROM hr_task WHERE name like '% XCoin'
 );

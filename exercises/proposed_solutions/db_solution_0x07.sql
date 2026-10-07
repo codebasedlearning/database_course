@@ -62,11 +62,11 @@ select * from belongs_to;
 -- 7.4 update date (search the id, do not hardcode it)
 
 -- looking for the id
-SELECT id from experiment where description like 'Cold Fusion';
+SELECT id from experiment where description = 'Cold Fusion';
 
 -- update with subselect
 update experiment set last_edited='2014-11-05 18:09:10'
-where id=(SELECT id from experiment where description like 'Cold Fusion');
+where id=(SELECT id from experiment where description = 'Cold Fusion');
 
 -- confirm
 select * from experiment;
@@ -78,7 +78,7 @@ select * from experiment;
 
 select D.id,D.file_path,D.configuration,D.data_type
 from belongs_to R join data D on R.data_id=D.id
-where R.experiment_id=(SELECT id from experiment where description like 'Cold Fusion')
+where R.experiment_id=(SELECT id from experiment where description = 'Cold Fusion')
   and D.data_type=2;
 
 -- 7.6

@@ -57,7 +57,7 @@ SELECT * FROM hr_works_in_at;
 SELECT E1.name, E2.name "Manager"
     FROM hr_employee E1
     JOIN hr_employee E2 on E1.employee_id = E2.id
-    WHERE E2.name like 'Mia';
+    WHERE E2.name = 'Mia';
 -- b)
 SELECT E1.name, D.name, T.name, W.hours_per_week, E2.name "Manager"
     FROM hr_employee E1

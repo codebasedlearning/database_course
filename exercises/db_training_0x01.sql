@@ -1,23 +1,32 @@
--- (C) 2025 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
+-- (C) A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
 
 -- SQL-Commands Unit 0x01
+
+-- all data
+SELECT * FROM ami_zone.shop_product;
 
 -- default schema, i.e. unqualified table names refer to ami_zone
 SET SEARCH_PATH = ami_zone;
 
--- all data
-SELECT * FROM ami_zone.shop_product;
-SELECT * FROM shop_product;
-SELECT P.* FROM shop_product P;
+-- projection example
+SELECT name, price FROM shop_product;
 
--- all columns and all rows
+-- selection example
+SELECT * FROM shop_product WHERE price>2;
+
+-- all columns and all rows with SEARCH_PATH in effect
 SELECT * FROM shop_product;
 
 -- tables with alias
 SELECT P.* FROM shop_product P;
 
--- note column names (aliases): unquoted names are folded to lower case (Product -> product),
--- double quotes keep case and allow blanks; single quotes are string literals, not names
+-- attributes with alias
+SELECT P.name, P.price FROM shop_product P WHERE price>2;
+
+-- note column names (aliases): unquoted names are folded to lower case
+-- (Product -> product),
+-- double quotes keep case and allow blanks; single quotes are string literals,
+-- not names
 SELECT id as "IDX",
   name Product,
   price "Price [€]"
@@ -43,7 +52,7 @@ SELECT
 FROM shop_customer;
 
 -- distinct values
-SELECT category_id FROM shop_product;
+SELECT category_id, name FROM shop_product;
 SELECT distinct category_id FROM shop_product;
 
 select * from shop_customer;
@@ -51,10 +60,12 @@ select * from shop_customer;
 -- count number of lines, with or without NULLs
 select count(*) from shop_customer;
 select count(discount_percent) from shop_customer;
+select count(distinct discount_percent) from shop_customer;
 select count(risk_of_loss_percent) from shop_customer;
 
--- selection with WHERE
 -- select * from shop_product;
+
+-- selection with WHERE
 SELECT name, price FROM shop_product
     WHERE price=1.99;
 
@@ -98,28 +109,29 @@ SELECT name, price FROM shop_product
 -- (Oracle needs 'FROM dual' here, PostgreSQL does not know DUAL)
 select now(), 1+2*3, random();
 
--- all tables in ami_zone
 
---      Divisions (div_)
+-- tables in ami_zone
+
+-- Divisions (div_)
 select * from div_department;
 select * from div_location;
 select * from div_located_in;
 select * from div_room;
---      HR (hr_)
+-- HR (hr_)
 select * from hr_employee;
 select * from hr_team;
 select * from hr_task;
 select * from hr_works_in_at;
 select * from hr_part_of;
 select * from hr_cat;
---      Shop (shop_)
+-- Shop (shop_)
 select * from shop_category;
 select * from shop_product;
 select * from shop_customer;
 select * from shop_order;
 select * from shop_connected_to;
 select * from shop_consists_of;
---      Assets (asset_)
+-- Assets (asset_)
 select * from asset_catalogue;
 select * from asset_inventory;
 select * from asset_inventory_furniture;

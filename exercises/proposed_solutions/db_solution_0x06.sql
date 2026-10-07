@@ -63,8 +63,9 @@ FROM (
 ORDER BY x.x DESC
 LIMIT 1;
 
--- description + max average
-SELECT c.description, x.x AS max_avg
+-- description + max average; two competitions are called 'Tennis Final - Singles',
+-- so id and for_male are shown as well
+SELECT c.id, c.description, c.for_male, x.x AS max_avg
 FROM (
   SELECT r.competition_id AS wk,
          COUNT(*) AS n_competitors,
@@ -118,12 +119,12 @@ SELECT * FROM shop_product P;
 SELECT * FROM shop_customer;
 
 -- sum up
-SELECT B.order_id, sum(P.price*B.units) summe
+SELECT B.order_id, sum(P.price*B.units) AS total
         FROM shop_consists_of B INNER JOIN shop_product P ON B.product_id=P.id
 GROUP BY order_id;
 
 -- with names
-SELECT o.id, o.delivery_time::date AS vom, k.brand, q.total
+SELECT o.id, o.delivery_time::date AS order_date, k.brand, q.total
 FROM shop_order o
 JOIN (
   SELECT b.order_id, SUM(p.price * b.units) AS total
@@ -134,7 +135,7 @@ JOIN (
 JOIN shop_customer k ON o.customer_id = k.id;
 
 CREATE OR REPLACE VIEW all_orders AS
-SELECT o.id, o.delivery_time::date AS vom, k.brand, q.total
+SELECT o.id, o.delivery_time::date AS order_date, k.brand, q.total
 FROM shop_order o
 JOIN (
   SELECT
@@ -154,14 +155,14 @@ DROP VIEW all_orders;
 
 -- inner view
 CREATE OR REPLACE VIEW core_orders AS (
-    SELECT B.order_id, sum(P.price*B.units) summe
+    SELECT B.order_id, sum(P.price*B.units) AS total
         FROM shop_consists_of B INNER JOIN shop_product P ON B.product_id=P.id GROUP BY order_id
 );
 SELECT * FROM core_orders;
 
 -- outer view
 CREATE OR REPLACE VIEW all_orders2 AS
-SELECT o.id, o.delivery_time::date AS vom, k.brand, q.summe
+SELECT o.id, o.delivery_time::date AS order_date, k.brand, q.total
 FROM shop_order o
 JOIN core_orders q ON o.id = q.order_id
 JOIN shop_customer k ON o.customer_id = k.id;

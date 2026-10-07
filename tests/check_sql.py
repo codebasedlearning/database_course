@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# (C) 2025 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
+# (C) A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
 """
 Runs all course scripts against a PostgreSQL server, in course order, and checks that
 

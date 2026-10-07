@@ -58,12 +58,12 @@ SELECT to_char(date '2014-10-13', 'FMDay FMMonth YYYY') AS long_text;
 -- working with views --
 
 -- all pizzas from products as view 'pizzas'
-SELECT P.name, P.price AS price
+SELECT P.name, P.price
     FROM shop_product P where P.name like '%Pizza%';
 
 -- create or replace view 'pizzas'
 CREATE OR REPLACE VIEW pizzas AS
-    SELECT P.name, P.price AS price
+    SELECT P.name, P.price
     FROM ami_zone.shop_product P where P.name like '%Pizza%';
 
 -- use it

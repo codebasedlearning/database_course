@@ -7,7 +7,8 @@ SET SEARCH_PATH = ami_zone;
 
 -- A5.1:
 
--- DROP SCHEMA ami_sport CASCADE;
+-- Caution: this deletes an existing ami_sport, including your own tables and data.
+DROP SCHEMA IF EXISTS ami_sport CASCADE;
 CREATE SCHEMA ami_sport;
 SET SEARCH_PATH = ami_sport;
 
@@ -26,7 +27,7 @@ CREATE TABLE IF NOT EXISTS athlete (
 CREATE TABLE IF NOT EXISTS competition (
   id          integer PRIMARY KEY,
   description varchar(100) NOT NULL,
-  for_male    boolean
+  for_male    boolean DEFAULT true   -- true: men, false: women, NULL: mixed
 );
 
 CREATE TABLE IF NOT EXISTS team (

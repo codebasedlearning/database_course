@@ -21,7 +21,7 @@ Stop the DBMS with `docker compose -f docker/compose.yml down`; your data stays 
 To start from scratch, stop the DBMS and delete `postgres_data`, or simply run a preparation script again
 (each one re-creates its schema).
 
-Details: [installation guide](./docs/datenbanken_wise202526_installation_dbms.pdf).
+Details: [installation guide](./docs/databases_installation.pdf).
 
 ## Content
 
@@ -30,7 +30,7 @@ Details: [installation guide](./docs/datenbanken_wise202526_installation_dbms.pd
   - `ami_kemper` – the university example from Kemper/Eickler, Datenbanksysteme (used in exams)
   - `ami_algebra` – two minimal relations R and S for the relational algebra
   - `ami_rel_model` – variants of modelling relationships (1:1, 1:n, n:m)
-- SQL training per unit in [exercises](./exercises), slides in the [SQL training](./docs/datenbanken_wise202526_sql_training.pdf)
+- SQL training per unit in [exercises](./exercises), slides in the [SQL training](./docs/databases_sql_training.pdf)
 - Proposed solutions in [proposed_solutions](./exercises/proposed_solutions)
 
 | Unit | Topic                             | Schema                   |
@@ -44,19 +44,8 @@ Details: [installation guide](./docs/datenbanken_wise202526_installation_dbms.pd
 | 0x07 | Insert, update, delete            | ami_sport (from 0x05)    |
 | 0x08 | Functions, procedures, triggers   | ami_zone                 |
 
-Units 0x06 and 0x07 build on schemas created in unit 0x05 (`ami_sport` is created in task 5.1/5.2).
-
-## Checking the scripts
-
-`tests/check_sql.py` runs all scripts in course order and reports unexpected errors. Statements that are
-supposed to fail (to demonstrate an error) are marked with a `-- expect-error` comment. The check also runs
-on GitHub for every push.
-
-```bash
-PGHOST=localhost PGPORT=5438 PGUSER=root PGPASSWORD=root PGDATABASE=postgres python3 tests/check_sql.py
-```
-
-Caution: this re-creates the sample schemas in your database.
+Unit 0x07 and the solutions of unit 0x06 need the schema `ami_sport` from task 5.1/5.2 (see `db_solution_0x05.sql`).
+Unit 0x06 creates `ami_example` itself if it is missing, so unit 0x05 does not have to be run first.
 
 ## Comments
 

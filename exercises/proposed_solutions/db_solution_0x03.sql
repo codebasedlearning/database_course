@@ -16,14 +16,16 @@ WHERE E.salary>0 ORDER BY E.employee_id;
 SELECT V.name, count(M.employee_id), min(M.salary), max(M.salary)
 FROM hr_employee M JOIN hr_employee V on M.employee_id = V.id
 WHERE M.salary>0
-GROUP BY M.employee_id, V.name;
+GROUP BY M.employee_id, V.name
+ORDER BY M.employee_id;
 
 -- (b)
 SELECT V.name, count(M.employee_id), min(M.salary), max(M.salary),
        avg(M.salary) as avg
 FROM hr_employee M JOIN hr_employee V on M.employee_id = V.id
 WHERE M.salary>0
-GROUP BY M.employee_id, V.name HAVING avg(M.salary)>50000;
+GROUP BY M.employee_id, V.name HAVING avg(M.salary)>50000
+ORDER BY M.employee_id;
 
 -- A3.2:
 SELECT * FROM shop_product;
