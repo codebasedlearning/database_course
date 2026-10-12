@@ -1,4 +1,4 @@
--- (C) 2025 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
+-- (C) A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
 
 -- SQL-Commands Unit 0x02
 
@@ -6,11 +6,8 @@
 SET SEARCH_PATH = ami_zone;
 
 -- all data
-SELECT P.id,P.name,P.category_id
-    FROM shop_product P;
-
-SELECT C.id,C.name
-    FROM shop_category C;
+SELECT P.id,P.name,P.category_id FROM shop_product P;
+SELECT C.id,C.name FROM shop_category C;
 
 -- goal
 SELECT P.id,P.name,C.name FROM shop_product P
