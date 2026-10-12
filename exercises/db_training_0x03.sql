@@ -1,4 +1,4 @@
--- (C) 2025 A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
+-- (C) A.Voß, a.voss@fh-aachen.de, info@codebasedlearning.dev
 
 -- SQL-Commands Unit 0x03
 
@@ -59,7 +59,7 @@ SELECT count(*) FROM shop_product WHERE unit='PC' AND VAT=0.07;  -- 16
 SELECT count(id) FROM shop_product WHERE unit='PC' AND VAT=0.19; --  6
 
 SELECT count(VAT),VAT,count(unit),unit,min(price),max(price)
-FROM shop_product GROUP BY VAT, unit ORDER BY VAT;
+FROM shop_product GROUP BY VAT, unit ORDER BY VAT, unit;
 
 -- Use Group Functions with Joins.
 -- Note: LIKE is case-sensitive in PostgreSQL ('%drinks' finds nothing, the
